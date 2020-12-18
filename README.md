@@ -7,7 +7,7 @@ git clone https://github.com/AiratHalitov/airat-aibolit-update
 
 cd airat-aibolit-update
 
-./airat-mysqltuner-update.sh
+./airat-aibolit-update.sh
 
 cd ai-bolit
 
