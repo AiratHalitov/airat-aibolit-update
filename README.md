@@ -1,6 +1,8 @@
 # airat-aibolit-update
 Скрипт для быстрой установки и/или обновления [ai-bolit](https://revisium.com/ai/) от Айрата Халитова
 
+**ВАЖНО:** Сайт https://revisium.com/ai теперь недоступен, но мой скрипт работает и выкачивает последнюю актуальную версию aibolit по прямой ссылке (вовремя сохранил)
+
 ## Установка и запуск:
 ```bash
 git clone https://github.com/AiratHalitov/airat-aibolit-update
