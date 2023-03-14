@@ -849,7 +849,7 @@ if (AI_EXTRA_WARN) {
 stdOut('Malware signatures: ' . $sign_count);
 
 if ($g_SpecificExt) {
-    stdOut("Scan specific extensions: " . implode(',', $g_SensitiveFiles));
+    stdOut("Scan specific extensions: " . implode(',', (array)$g_SensitiveFiles));
 }
 
 if (DEBUG_PERFORMANCE) {
