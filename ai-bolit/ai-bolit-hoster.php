@@ -888,9 +888,9 @@ if ($defaults['memory_limit'] && ($defaults['memory_limit'] = AibolitHelpers::ge
 }
 
 if (realpath($defaults['path']) === false) {
-    define('ROOT_PATH', $defaults['path']);
+    define('ROOT_PATH', fix_path($defaults['path']));
 } else {
-    define('ROOT_PATH', realpath($defaults['path']));
+    define('ROOT_PATH', fix_path(realpath($defaults['path'])));
 }
 
 if (!ROOT_PATH) {
@@ -5105,6 +5105,19 @@ class HashTable
     }
 }
 
+/**
+ * This function transforms the input path and changes "\" to "/" on Windows only machines.
+ * This is reqiured because this script is actually not cross-platform and uses "/" internally.
+ * @param string $path
+ * @return string
+ */
+function fix_path($path)
+{
+    if (stristr(PHP_OS, 'WIN'))
+        return str_replace('\\', '/', $path);
+    else
+        return $path;
+}
 
 /**
  * Fixes filename for Windows (if it contains double dot :).
@@ -5177,6 +5190,7 @@ class Finder
 
     private function walk($path, $follow_symlinks)
     {
+        $path = fix_path($path);
         $level = substr_count($path, '/');
         if (isset($this->level_limit) && (($level - $this->initial_level + 1) > $this->level_limit)) {
             return;
@@ -5204,7 +5218,7 @@ class Finder
             if ($entry == '.' || $entry == '..') {
                 continue;
             }
-            $entry = $path . DIRECTORY_SEPARATOR . $entry;
+            $entry = $path . '/' . $entry;
             if (is_link($entry)) {
 
                 if ($this->collect_symLinks) {
@@ -5300,7 +5314,8 @@ class Finder
         # but can contain invalid sequence e.g. [9-0]
         $paths = is_array($target) ? $target : new GlobIterator($target, FilesystemIterator::CURRENT_AS_PATHNAME);
         foreach ($paths as $path) {
-            $this->initial_dir = realpath($path);
+            $path = fix_path($path);
+            $this->initial_dir = $path;
             $this->initial_level = substr_count($this->initial_dir, '/');
             $path = $this->linkResolve($path);
             yield from $this->expandPath($path, $this->filter->isFollowSymlink());
@@ -6265,9 +6280,13 @@ class FileFilter
     {
         $tree = [];
         $path = $file;
-        $tree[] = $basename ? basename($file) : $file;
+        $tree[] = fix_path($basename ? basename($file) : $file);
         while ($path !== '.' && $path !== '/' && $path !== '') {
-            $path = dirname($path, 1);
+            //We need to add extra check when we reach the top level directory because it's different on Linux and Win
+            $last = $path;
+            $path = fix_path(dirname($path, 1));
+            if ($path === $last)
+                break;
             $tree[] = $basename ? basename($path) : $path;
         }
         return $tree;
