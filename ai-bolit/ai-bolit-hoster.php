@@ -168,7 +168,7 @@ function printProgress($num, $par_File, $vars) {
         $left_files      = $total_files - $num;
         if ($fs > 0) {
             $left_time = ($left_files / $fs); //ceil($left_files / $fs);
-            $stat      = ' [Avg: ' . round($fs, 2) . ' files/s' . ($left_time > 0 ? ' Left: ' . AibolitHelpers::seconds2Human($left_time) : '') . '] [Mlw:' . (count($vars->criticalPHP) + count($vars->warningPHP)) . '|' . (count($vars->criticalJS) + count($vars->phishing)) . ']';
+            $stat      = ' [Avg: ' . round($fs, 2) . ' files/s' . ($left_time > 0 ? ' Left: ' . AibolitHelpers::seconds2Human($left_time) : '') . '] [Mlw:' . (count((array)$vars->criticalPHP) + count((array)$vars->warningPHP)) . '|' . (count((array)$vars->criticalJS) + count((array)$vars->phishing)) . ']';
         }
     }
 
@@ -1094,7 +1094,7 @@ try {
             $lines->setFlags(SplFileObject::READ_AHEAD | SplFileObject::SKIP_EMPTY | SplFileObject::DROP_NEW_LINE);
         }
         if (is_array($lines)) {
-            $vars->foundTotalFiles = count($lines);
+            $vars->foundTotalFiles = count((array)$lines);
         } else if ($lines instanceof SplFileObject) {
             $lines->seek($lines->getSize());
             $vars->foundTotalFiles = $lines->key();
@@ -1146,12 +1146,12 @@ $vars->doorway = $finder->getDoorways();
 $vars->symLinks = $finder->getSymlinks();
 $vars->bigFiles = $finder->getBigFiles();
 
-if (count($vars->bigFiles) > 0) {
+if (count((array)$vars->bigFiles) > 0) {
     $scan->prepareBigFilesToCriticalList($vars->bigFiles, $vars);
 }
 $bigElfs = $finder->getBigElfFiles();
 
-if (count($bigElfs) > 0) {
+if (count((array)$bigElfs) > 0) {
     $scan->prepareBigElfFilesToCriticalSusList($bigElfs, $vars);
 }
 
@@ -1161,7 +1161,7 @@ list($snum, $i) = $scan->whitelisting();
 
 ////////////////////////////////////////////////////////////////////////////
 if (BOOL_RESULT && (!defined('NEED_REPORT'))) {
-    if ((count($vars->criticalPHP) > 0) || (count($vars->criticalJS) > 0) || (count($vars->phishing) > 0)) {
+    if ((count((array)$vars->criticalPHP) > 0) || (count((array)$vars->criticalJS) > 0) || (count((array)$vars->phishing) > 0)) {
         exit(2);
     } else {
         exit(0);
@@ -1175,7 +1175,7 @@ $time_taken = AibolitHelpers::seconds2Human(microtime(true) - START_TIME);
 
 stdOut("\nBuilding report [ mode = " . AI_EXPERT . " ]\n");
 
-//stdOut("\nLoaded signatures: " . count($g_FlexDBShe) . " / " . count($g_JSVirSig) . "\n");
+//stdOut("\nLoaded signatures: " . count((array)$g_FlexDBShe) . " / " . count((array)$g_JSVirSig) . "\n");
 
 ////////////////////////////////////////////////////////////////////////////
 
@@ -1190,31 +1190,31 @@ foreach($reportFactory($reports) as $report) {
 }
 stdOut("\n");
 
-stdOut("Building list of vulnerable scripts " . count($vars->vulnerable));
+stdOut("Building list of vulnerable scripts " . count((array)$vars->vulnerable));
 
-stdOut("Building list of shells " . count($vars->criticalPHP));
+stdOut("Building list of shells " . count((array)$vars->criticalPHP));
 
-stdOut("Building list of js " . count($vars->criticalJS));
+stdOut("Building list of js " . count((array)$vars->criticalJS));
 
-stdOut("Building list of unread files " . count($vars->notRead));
+stdOut("Building list of unread files " . count((array)$vars->notRead));
 
 if (!AI_HOSTER) {
-    stdOut("Building list of phishing pages " . count($vars->phishing));
+    stdOut("Building list of phishing pages " . count((array)$vars->phishing));
 
-    stdOut("Building list of symlinks " . count($vars->symLinks));
+    stdOut("Building list of symlinks " . count((array)$vars->symLinks));
 
 }
 
 if (AI_EXTRA_WARN) {
-    stdOut("Building list of suspicious files " . count($vars->warningPHP));
+    stdOut("Building list of suspicious files " . count((array)$vars->warningPHP));
 }
 ////////////////////////////////////
 if (!AI_HOSTER) {
-    stdOut("Building list of adware " . count($vars->adwareList));
+    stdOut("Building list of adware " . count((array)$vars->adwareList));
 
-    stdOut("Building list of bigfiles " . count($vars->bigFiles));
+    stdOut("Building list of bigfiles " . count((array)$vars->bigFiles));
 
-    stdOut("Building list of doorways " . count($vars->doorway));
+    stdOut("Building list of doorways " . count((array)$vars->doorway));
 }
 
 if (!defined('REPORT') || REPORT === '') {
@@ -1244,8 +1244,8 @@ if (is_object($debug)) {
 
 # exit with code
 
-$l_EC1 = count($vars->criticalPHP);
-$l_EC2 = count($vars->criticalJS) + count($vars->phishing) + count($vars->warningPHP);
+$l_EC1 = count((array)$vars->criticalPHP);
+$l_EC2 = count((array)$vars->criticalJS) + count((array)$vars->phishing) + count((array)$vars->warningPHP);
 $code  = 0;
 
 if ($l_EC1 > 0) {
@@ -1257,10 +1257,10 @@ if ($l_EC1 > 0) {
 }
 
 $stat = array(
-    'php_malware'   => count($vars->criticalPHP),
-    'cloudhash'     => count($vars->blackFiles),
-    'js_malware'    => count($vars->criticalJS),
-    'phishing'      => count($vars->phishing)
+    'php_malware'   => count((array)$vars->criticalPHP),
+    'cloudhash'     => count((array)$vars->blackFiles),
+    'js_malware'    => count((array)$vars->criticalJS),
+    'phishing'      => count((array)$vars->phishing)
 );
 
 if (function_exists('aibolit_onComplete')) {
@@ -1700,51 +1700,51 @@ class LoadSignaturesForScan
             $this->sig_db_meta_info['version'] = $avdb_meta_info ? $avdb_meta_info['version'] : 'n/a';
             $this->sig_db_meta_info['release-type'] = $avdb_meta_info ? $avdb_meta_info['release-type'] : 'n/a';
 
-            if (count($this->_DBShe) <= 1) {
+            if (count((array)$this->_DBShe) <= 1) {
                 $this->_DBShe = [];
             }
 
-            if (count($this->X_DBShe) <= 1) {
+            if (count((array)$this->X_DBShe) <= 1) {
                 $this->X_DBShe = [];
             }
 
-            if (count($this->_FlexDBShe) <= 1) {
+            if (count((array)$this->_FlexDBShe) <= 1) {
                 $this->_FlexDBShe = [];
             }
 
-            if (count($this->X_FlexDBShe) <= 1) {
+            if (count((array)$this->X_FlexDBShe) <= 1) {
                 $this->X_FlexDBShe = [];
             }
 
-            if (count($this->XX_FlexDBShe) <= 1) {
+            if (count((array)$this->XX_FlexDBShe) <= 1) {
                 $this->XX_FlexDBShe = [];
             }
 
-            if (count($this->_ExceptFlex) <= 1) {
+            if (count((array)$this->_ExceptFlex) <= 1) {
                 $this->_ExceptFlex = [];
             }
 
-            if (count($this->_AdwareSig) <= 1) {
+            if (count((array)$this->_AdwareSig) <= 1) {
                 $this->_AdwareSig = [];
             }
 
-            if (count($this->_PhishingSig) <= 1) {
+            if (count((array)$this->_PhishingSig) <= 1) {
                 $this->_PhishingSig = [];
             }
 
-            if (count($this->X_JSVirSig) <= 1) {
+            if (count((array)$this->X_JSVirSig) <= 1) {
                 $this->X_JSVirSig = [];
             }
 
-            if (count($this->_JSVirSig) <= 1) {
+            if (count((array)$this->_JSVirSig) <= 1) {
                 $this->_JSVirSig = [];
             }
 
-            if (count($this->_SusDB) <= 1) {
+            if (count((array)$this->_SusDB) <= 1) {
                 $this->_SusDB = [];
             }
 
-            if (count($this->_SusDBPrio) <= 1) {
+            if (count((array)$this->_SusDBPrio) <= 1) {
                 $this->_SusDBPrio = [];
             }
 
@@ -1801,8 +1801,8 @@ class LoadSignaturesForScan
             }
         }
 
-        $this->count = count($this->_JSVirSig) + count($this->X_JSVirSig) + count($this->_DBShe) + count($this->X_DBShe) + count($this->_FlexDBShe) + count($this->X_FlexDBShe) + count($this->XX_FlexDBShe);
-        $this->count_susp = $this->count + count($this->_SusDB);
+        $this->count = count((array)$this->_JSVirSig) + count((array)$this->X_JSVirSig) + count((array)$this->_DBShe) + count((array)$this->X_DBShe) + count((array)$this->_FlexDBShe) + count((array)$this->X_FlexDBShe) + count((array)$this->XX_FlexDBShe);
+        $this->count_susp = $this->count + count((array)$this->_SusDB);
 
         if (!$debug) {
             $this->OptimizeSignatures();
@@ -1821,7 +1821,7 @@ class LoadSignaturesForScan
         ($this->mode == 2) && ($this->_JSVirSig = array_merge($this->_JSVirSig, $this->X_JSVirSig));
         $this->X_JSVirSig = [];
 
-        $count = count($this->_FlexDBShe);
+        $count = count((array)$this->_FlexDBShe);
 
         for ($i = 0; $i < $count; $i++) {
             if ($this->_FlexDBShe[$i] == '[a-zA-Z0-9_]+?\(\s*[a-zA-Z0-9_]+?=\s*\)')
@@ -1850,7 +1850,7 @@ class LoadSignaturesForScan
         //optSig($g_ExceptFlex);
 
         // convert exception rules
-        $cnt = count($this->_ExceptFlex);
+        $cnt = count((array)$this->_ExceptFlex);
         for ($i = 0; $i < $cnt; $i++) {
             $this->_ExceptFlex[$i] = trim(Normalization::normalize($this->_ExceptFlex[$i]));
             if ($this->_ExceptFlex[$i] == '')
@@ -1929,7 +1929,7 @@ class LoadSignaturesForScan
             $s = substr($line, $prefix_len);
             $len += strlen($s);
             if ($len > $limit) {
-                if (count($suffixes) == 1) {
+                if (count((array)$suffixes) == 1) {
                     $r[] = $prefix . $suffixes[0];
                 } else {
                     $r[] = $prefix . '(?:' . implode('|', $suffixes) . ')';
@@ -1941,7 +1941,7 @@ class LoadSignaturesForScan
         }
 
         if (!empty($suffixes)) {
-            if (count($suffixes) == 1) {
+            if (count((array)$suffixes) == 1) {
                 $r[] = $prefix . $suffixes[0];
             } else {
                 $r[] = $prefix . '(?:' . implode('|', $suffixes) . ')';
@@ -2212,7 +2212,7 @@ class CmsVersionDetector
     }
 
     function isCms($name, $version) {
-        for ($i = 0, $iMax = count($this->types); $i < $iMax; $i++) {
+        for ($i = 0, $iMax = count((array)$this->types); $i < $iMax; $i++) {
             if ((strpos($this->types[$i], $name) !== false) && (strpos($this->versions[$i], $version) !== false)) {
                 return true;
             }
@@ -2230,7 +2230,7 @@ class CmsVersionDetector
     }
 
     function getCmsNumber() {
-        return count($this->types);
+        return count((array)$this->types);
     }
 
     function getCmsName($index = 0) {
@@ -2759,19 +2759,19 @@ class JSONReport extends Report
     private function generateSummary($vars, $scan_time)
     {
         $summary_counters                       = [];
-        $summary_counters['redirect']           = 0; //count($vars->redirect);
-        $summary_counters['critical_php']       = count($vars->criticalPHP);
-        $summary_counters['critical_js']        = count($vars->criticalJS);
-        $summary_counters['cloudhash']          = count($vars->blackFiles);
-        $summary_counters['phishing']           = count($vars->phishing);
-        $summary_counters['unix_exec']          = 0; // count($g_UnixExec);
-        $summary_counters['iframes']            = 0; // count($g_Iframer);
-        $summary_counters['not_read']           = count($vars->notRead);
-        $summary_counters['base64']             = 0; // count($g_Base64);
-        $summary_counters['heuristics']         = 0; // count($g_HeuristicDetected);
-        $summary_counters['symlinks']           = count($vars->symLinks);
-        $summary_counters['big_files_skipped']  = count($vars->bigFiles);
-        $summary_counters['suspicious']         = count($vars->warningPHP);
+        $summary_counters['redirect']           = 0; //count((array)$vars->redirect);
+        $summary_counters['critical_php']       = count((array)$vars->criticalPHP);
+        $summary_counters['critical_js']        = count((array)$vars->criticalJS);
+        $summary_counters['cloudhash']          = count((array)$vars->blackFiles);
+        $summary_counters['phishing']           = count((array)$vars->phishing);
+        $summary_counters['unix_exec']          = 0; // count((array)$g_UnixExec);
+        $summary_counters['iframes']            = 0; // count((array)$g_Iframer);
+        $summary_counters['not_read']           = count((array)$vars->notRead);
+        $summary_counters['base64']             = 0; // count((array)$g_Base64);
+        $summary_counters['heuristics']         = 0; // count((array)$g_HeuristicDetected);
+        $summary_counters['symlinks']           = count((array)$vars->symLinks);
+        $summary_counters['big_files_skipped']  = count((array)$vars->bigFiles);
+        $summary_counters['suspicious']         = count((array)$vars->warningPHP);
 
         $this->raw_report['summary']['counters']    = $summary_counters;
         $this->raw_report['summary']['total_files'] = $vars->foundTotalFiles;
@@ -2791,43 +2791,43 @@ class JSONReport extends Report
     {
         $this->raw_report['vulners'] = $this->getRawJsonVuln($vars->vulnerable, $vars);
 
-        if (count($vars->criticalPHP) > 0) {
+        if (count((array)$vars->criticalPHP) > 0) {
             $this->raw_report['php_malware'] = $this->getRawJson($vars->criticalPHP, $vars, $vars->criticalPHPFragment, $vars->criticalPHPSig);
         }
 
-        if (count($vars->blackFiles) > 0) {
+        if (count((array)$vars->blackFiles) > 0) {
             $this->raw_report['cloudhash'] = $this->getRawBlackData($vars->blackFiles);
         }
 
-        if (count($vars->criticalJS) > 0) {
+        if (count((array)$vars->criticalJS) > 0) {
             $this->raw_report['js_malware'] = $this->getRawJson($vars->criticalJS, $vars, $vars->criticalJSFragment, $vars->criticalJSSig);
         }
 
-        if (count($vars->notRead) > 0) {
+        if (count((array)$vars->notRead) > 0) {
             $this->raw_report['not_read'] = $this->getSimpleList($vars->notRead);
         }
 
-        if (count($vars->phishing) > 0) {
+        if (count((array)$vars->phishing) > 0) {
             $this->raw_report['phishing'] = $this->getRawJson($vars->phishing, $vars, $vars->phishingFragment, $vars->phishingSigFragment);
         }
-        if (count($vars->symLinks) > 0) {
+        if (count((array)$vars->symLinks) > 0) {
             $this->raw_report['sym_links'] = $this->getSimpleList($vars->symLinks);
         }
-        if (count($vars->adwareList) > 0) {
+        if (count((array)$vars->adwareList) > 0) {
             $this->raw_report['adware'] = $this->getRawJson($vars->adwareList, $vars, $vars->adwareListFragment);
         }
-        if (count($vars->bigFiles) > 0) {
+        if (count((array)$vars->bigFiles) > 0) {
             $this->raw_report['big_files'] = $this->getSimpleList($vars->bigFiles);
         }
-        if ((count($vars->doorway) > 0) && JSONReport::checkMask($this->report_mask, JSONReport::REPORT_MASK_DOORWAYS)) {
+        if ((count((array)$vars->doorway) > 0) && JSONReport::checkMask($this->report_mask, JSONReport::REPORT_MASK_DOORWAYS)) {
             $this->raw_report['doorway'] = $this->getRawJson($vars->doorway, $vars);
         }
-        if (count($vars->CMS) > 0) {
+        if (count((array)$vars->CMS) > 0) {
             $this->raw_report['cms'] = $this->getSimpleList($vars->CMS);
         }
 
         if ($this->ai_extra_warn) {
-            if ((count($vars->warningPHP) > 0) && JSONReport::checkMask($this->report_mask, JSONReport::REPORT_MASK_FULL)) {
+            if ((count((array)$vars->warningPHP) > 0) && JSONReport::checkMask($this->report_mask, JSONReport::REPORT_MASK_FULL)) {
                 $this->raw_report['suspicious'] = $this->getRawJson($vars->warningPHP, $vars, $vars->warningPHPFragment, $vars->warningPHPSig);
             }
         }
@@ -2879,7 +2879,7 @@ class JSONReport extends Report
             '<' . '?php '
         ];
 
-        for ($i = 0, $iMax = count($par_List); $i < $iMax; $i++) {
+        for ($i = 0, $iMax = count((array)$par_List); $i < $iMax; $i++) {
             $l_Pos = $par_List[$i]['ndx'];
 
             $fn = $this->addPrefix . str_replace($this->noPrefix, '', $vars->structure['n'][$l_Pos]);
@@ -2918,7 +2918,7 @@ class JSONReport extends Report
             '<' . '?php '
         ];
 
-        for ($i = 0, $iMax = count($par_List); $i < $iMax; $i++) {
+        for ($i = 0, $iMax = count((array)$par_List); $i < $iMax; $i++) {
             if ($par_SigId != null) {
                 $l_SigId = 'id_' . $par_SigId[$i];
             } else {
@@ -3107,35 +3107,35 @@ class PlainReport extends Report
             $this->raw_report .= "\n";
         }
 
-        if (count($vars->criticalPHP) > 0) {
+        if (count((array)$vars->criticalPHP) > 0) {
             $this->raw_report .= '[SERVER MALWARE]' . "\n" . $this->printPlainList(array_slice($vars->criticalPHP, 0, self::MAX_ROWS), $vars,  $vars->criticalPHPFragment) . "\n";
         }
 
-        if (count($vars->criticalJS) > 0) {
+        if (count((array)$vars->criticalJS) > 0) {
             $this->raw_report .= '[CLIENT MALWARE / JS]' . "\n" . $this->printPlainList(array_slice($vars->criticalJS, 0, self::MAX_ROWS), $vars,  $vars->criticalJSFragment) . "\n";
         }
 
-        if (count($vars->notRead) > 0) {
+        if (count((array)$vars->notRead) > 0) {
             $this->raw_report .= '[SCAN ERROR / SKIPPED]' . "\n" . $this->printPlainList(array_slice($vars->notRead, 0, self::AIBOLIT_MAX_NUMBER), $vars) . "\n\n";
         }
 
-        if (count($vars->phishing) > 0) {
+        if (count((array)$vars->phishing) > 0) {
             $this->raw_report .= '[PHISHING]' . "\n" . $this->printPlainList($vars->phishing, $vars,  $vars->phishingFragment) . "\n";
         }
-        if (count($vars->symLinks) > 0) {
+        if (count((array)$vars->symLinks) > 0) {
             $this->raw_report .= '[SYMLINKS]' . "\n" . $this->printPlainList(array_slice($vars->symLinks, 0, self::AIBOLIT_MAX_NUMBER), $vars) . "\n\n";
         }
 
         if ($this->ai_extra_warn) {
-            if (count($vars->warningPHP) > 0) {
+            if (count((array)$vars->warningPHP) > 0) {
                 $this->raw_report .= '[SUSPICIOUS]' . "\n" . $this->printPlainList(array_slice($vars->warningPHP, 0, self::AIBOLIT_MAX_NUMBER), $vars,  $vars->warningPHPFragment) . "\n";
             }
         }
 
-        if (count($vars->adwareList) > 0) {
+        if (count((array)$vars->adwareList) > 0) {
             $this->raw_report .= '[ADWARE]' . "\n" . $this->printPlainList($vars->adwareList, $vars,  $vars->adwareListFragment) . "\n";
         }
-        if (count($vars->bigFiles) > 0) {
+        if (count((array)$vars->bigFiles) > 0) {
             $this->raw_report .= '[BIG FILES / SKIPPED]' . "\n" . $this->printPlainList(array_slice($vars->bigFiles, 0, self::AIBOLIT_MAX_NUMBER), $vars) . "\n\n";
         }
 
@@ -3177,7 +3177,7 @@ class PlainReport extends Report
             '\''
         ];
 
-        for ($i = 0, $iMax = count($par_List); $i < $iMax; $i++) {
+        for ($i = 0, $iMax = count((array)$par_List); $i < $iMax; $i++) {
             $l_Pos = $par_List[$i];
 
             if ($par_Details != null) {
@@ -3263,43 +3263,43 @@ class CSVReport extends Report
     {
         $this->writeRawCSVVuln($vars->vulnerable, $vars);
 
-        if (count($vars->criticalPHP) > 0) {
+        if (count((array)$vars->criticalPHP) > 0) {
             $this->writeRawCSV($vars->criticalPHP, $vars, self::CRITICAL_PHP, $vars->criticalPHPFragment, $vars->criticalPHPSig);
         }
 
-        if (count($vars->blackFiles) > 0) {
+        if (count((array)$vars->blackFiles) > 0) {
             $this->writeRawBlackData($vars->blackFiles);
         }
 
-        if (count($vars->criticalJS) > 0) {
+        if (count((array)$vars->criticalJS) > 0) {
             $this->writeRawCSV($vars->criticalJS, $vars, self::CRITICAL_JS, $vars->criticalJSFragment, $vars->criticalJSSig);
         }
 
-        if (count($vars->notRead) > 0) {
+        if (count((array)$vars->notRead) > 0) {
             $this->writeListCSV(self::NOT_READ, $vars->notRead);
         }
 
-        if (count($vars->phishing) > 0) {
+        if (count((array)$vars->phishing) > 0) {
             $this->writeRawCSV($vars->phishing, $vars, self::PHISHING, $vars->phishingFragment, $vars->phishingSigFragment);
         }
-        if (count($vars->symLinks) > 0) {
+        if (count((array)$vars->symLinks) > 0) {
             $this->writeListCSV(self::SYMLINKS, $vars->symLinks);
         }
-        if (count($vars->adwareList) > 0) {
+        if (count((array)$vars->adwareList) > 0) {
             $this->writeRawCSV($vars->adwareList, $vars, self::ADWARE, $vars->adwareListFragment);
         }
-        if (count($vars->bigFiles) > 0) {
+        if (count((array)$vars->bigFiles) > 0) {
             $this->writeListCSV(self::BIG_FILES, $vars->bigFiles);
         }
-        if (count($vars->doorway) > 0) {
+        if (count((array)$vars->doorway) > 0) {
             $this->writeRawCSV($vars->doorway, $vars, self::DOORWAY);
         }
-        if (count($vars->CMS) > 0) {
+        if (count((array)$vars->CMS) > 0) {
             $this->writeListCSV(self::CMS, $vars->CMS);
         }
 
         if ($this->ai_extra_warn) {
-            if (count($vars->warningPHP) > 0) {
+            if (count((array)$vars->warningPHP) > 0) {
                 $this->writeRawCSV($vars->warningPHP, $vars, self::SUSPICIOUS, $vars->warningPHPFragment, $vars->warningPHPSig);
             }
         }
@@ -3321,11 +3321,11 @@ class CSVReport extends Report
     ////////////////////////////////////////////////////////////////////////////
     private function writeRawCSVVuln($par_List, $vars)
     {
-        if (count($par_List) === 0) {
+        if (count((array)$par_List) === 0) {
             return;
         }
         $fh = fopen($this->file . '.tmp', 'a+');
-        for ($i = 0, $iMax = count($par_List); $i < $iMax; $i++) {
+        for ($i = 0, $iMax = count((array)$par_List); $i < $iMax; $i++) {
             $res    = [];
             $l_Pos  = $par_List[$i]['ndx'];
             $fn     = $this->addPrefix . str_replace($this->noPrefix, '', $vars->structure['n'][$l_Pos]);
@@ -3354,11 +3354,11 @@ class CSVReport extends Report
 
     private function writeListCSV($section, $list)
     {
-        if (count($list) === 0) {
+        if (count((array)$list) === 0) {
             return;
         }
         $fh = fopen($this->file . '.tmp', "a+");
-        for ($i = 0, $iMax = count($list); $i < $iMax; $i++) {
+        for ($i = 0, $iMax = count((array)$list); $i < $iMax; $i++) {
             $res = [];
             $res[] = $section;
             $res[] = ENCODE_FILENAMES_WITH_BASE64 ? base64_encode($list[$i]) : $list[$i];
@@ -3386,7 +3386,7 @@ class CSVReport extends Report
 
     private function writeRawCSV($par_List, $vars, $section = '', $par_Details = null, $par_SigId = null)
     {
-        if (count($par_List) === 0) {
+        if (count((array)$par_List) === 0) {
             return;
         }
         $fh = fopen($this->file . '.tmp', "a+");
@@ -3409,7 +3409,7 @@ class CSVReport extends Report
             ''
         ];
 
-        for ($i = 0, $iMax = count($par_List); $i < $iMax; $i++) {
+        for ($i = 0, $iMax = count((array)$par_List); $i < $iMax; $i++) {
             $res = [];
             $res[] = $section;
             if ($par_SigId != null) {
@@ -3464,7 +3464,7 @@ class CSVReport extends Report
 
     private function writeRawBlackData($black_list)
     {
-        if (count($black_list) === 0) {
+        if (count((array)$black_list) === 0) {
             return;
         }
         $fh = fopen($this->file . '.tmp', 'a+');
@@ -3569,12 +3569,12 @@ class DoublecheckReport extends Report
         $this->raw_report = array_merge($vars->criticalPHP, $vars->criticalJS, $vars->phishing, $vars->adwareList, $vars->redirect);
         $this->raw_report = array_values(array_unique($this->raw_report));
 
-        for ($i = 0, $iMax = count($this->raw_report); $i < $iMax; $i++) {
+        for ($i = 0, $iMax = count((array)$this->raw_report); $i < $iMax; $i++) {
             $this->raw_report[$i] = str_replace($l_CurrPath, '.', $vars->structure['n'][$this->raw_report[$i]]);
         }
 
         $this->raw_report = array_values(array_unique($this->raw_report));
-        if (count($this->raw_report) === 0) {
+        if (count((array)$this->raw_report) === 0) {
             $this->skip = true;
             unlink($this->file . '.tmp');
         }
@@ -3587,7 +3587,7 @@ class DoublecheckReport extends Report
             return $this->res;
         }
         $fh = fopen($this->file . '.tmp', "a+");
-        for ($i = 0, $iMax = count($this->raw_report); $i < $iMax; $i++) {
+        for ($i = 0, $iMax = count((array)$this->raw_report); $i < $iMax; $i++) {
             fputs($fh, $this->raw_report[$i] . "\n");
         }
         fclose($fh);
@@ -3706,49 +3706,49 @@ class HTMLReport extends Report
         $l_Summary = '<div class="title">' . Translate::getStr('report.summary') . '</div>';
         $l_Summary .= '<table cellspacing=0 border=0>';
 
-        if (count($vars->criticalPHP) > 0) {
-            $l_Summary .= $this->makeSummary(Translate::getStr('malware'), count($vars->criticalPHP), "crit");
+        if (count((array)$vars->criticalPHP) > 0) {
+            $l_Summary .= $this->makeSummary(Translate::getStr('malware'), count((array)$vars->criticalPHP), "crit");
         }
 
-        if (count($vars->criticalJS) > 0) {
-            $l_Summary .= $this->makeSummary(Translate::getStr('js_virused'), count($vars->criticalJS), "crit");
+        if (count((array)$vars->criticalJS) > 0) {
+            $l_Summary .= $this->makeSummary(Translate::getStr('js_virused'), count((array)$vars->criticalJS), "crit");
         }
 
-        if (count($vars->phishing) > 0) {
-            $l_Summary .= $this->makeSummary(Translate::getStr('phishing_pages'), count($vars->phishing), "crit");
+        if (count((array)$vars->phishing) > 0) {
+            $l_Summary .= $this->makeSummary(Translate::getStr('phishing_pages'), count((array)$vars->phishing), "crit");
         }
 
-        if (count($vars->notRead) > 0) {
-            $l_Summary .= $this->makeSummary(Translate::getStr('error.read_file'), count($vars->notRead), "crit");
+        if (count((array)$vars->notRead) > 0) {
+            $l_Summary .= $this->makeSummary(Translate::getStr('error.read_file'), count((array)$vars->notRead), "crit");
         }
 
-        if (count($vars->warningPHP) > 0) {
-            $l_Summary .= $this->makeSummary(Translate::getStr('suspicious'), count($vars->warningPHP), "warn");
+        if (count((array)$vars->warningPHP) > 0) {
+            $l_Summary .= $this->makeSummary(Translate::getStr('suspicious'), count((array)$vars->warningPHP), "warn");
         }
 
-        if (count($vars->bigFiles) > 0) {
-            $l_Summary .= $this->makeSummary(Translate::getStr('skipped_large_file'), count($vars->bigFiles), "warn");
+        if (count((array)$vars->bigFiles) > 0) {
+            $l_Summary .= $this->makeSummary(Translate::getStr('skipped_large_file'), count((array)$vars->bigFiles), "warn");
         }
 
-        if (count($vars->symLinks) > 0) {
-            $l_Summary .= $this->makeSummary(Translate::getStr('link.symbolic'), count($vars->symLinks), "warn");
+        if (count((array)$vars->symLinks) > 0) {
+            $l_Summary .= $this->makeSummary(Translate::getStr('link.symbolic'), count((array)$vars->symLinks), "warn");
         }
 
         $l_Summary .= "</table>";
 
         $l_ArraySummary                      = [];
-        $l_ArraySummary["redirect"]          = count($vars->redirect);
-        $l_ArraySummary["critical_php"]      = count($vars->criticalPHP);
-        $l_ArraySummary["critical_js"]       = count($vars->criticalJS);
-        $l_ArraySummary["phishing"]          = count($vars->phishing);
-        $l_ArraySummary["unix_exec"]         = 0; // count($g_UnixExec);
-        $l_ArraySummary["iframes"]           = 0; // count($g_Iframer);
-        $l_ArraySummary["not_read"]          = count($vars->notRead);
-        $l_ArraySummary["base64"]            = 0; // count($g_Base64);
-        $l_ArraySummary["heuristics"]        = 0; // count($g_HeuristicDetected);
-        $l_ArraySummary["symlinks"]          = count($vars->symLinks);
-        $l_ArraySummary["big_files_skipped"] = count($vars->bigFiles);
-        $l_ArraySummary["suspicious"]        = count($vars->warningPHP);
+        $l_ArraySummary["redirect"]          = count((array)$vars->redirect);
+        $l_ArraySummary["critical_php"]      = count((array)$vars->criticalPHP);
+        $l_ArraySummary["critical_js"]       = count((array)$vars->criticalJS);
+        $l_ArraySummary["phishing"]          = count((array)$vars->phishing);
+        $l_ArraySummary["unix_exec"]         = 0; // count((array)$g_UnixExec);
+        $l_ArraySummary["iframes"]           = 0; // count((array)$g_Iframer);
+        $l_ArraySummary["not_read"]          = count((array)$vars->notRead);
+        $l_ArraySummary["base64"]            = 0; // count((array)$g_Base64);
+        $l_ArraySummary["heuristics"]        = 0; // count((array)$g_HeuristicDetected);
+        $l_ArraySummary["symlinks"]          = count((array)$vars->symLinks);
+        $l_ArraySummary["big_files_skipped"] = count((array)$vars->bigFiles);
+        $l_ArraySummary["suspicious"]        = count((array)$vars->warningPHP);
 
         if (function_exists('json_encode')) {
             $l_Summary .= "<!--[json]" . json_encode($l_ArraySummary) . "[/json]-->";
@@ -3761,8 +3761,8 @@ class HTMLReport extends Report
         $this->raw_report .= Translate::getStr('critical.title');
 
         if(!$this->ai_hoster) {
-            if (count($vars->vulnerable) > 0) {
-                $this->raw_report .= '<div class="note_vir">' . Translate::getStr('script.vulnerable') . ' (' . count($vars->vulnerable) . ')</div><div class="crit">';
+            if (count((array)$vars->vulnerable) > 0) {
+                $this->raw_report .= '<div class="note_vir">' . Translate::getStr('script.vulnerable') . ' (' . count((array)$vars->vulnerable) . ')</div><div class="crit">';
                 foreach ($vars->vulnerable as $l_Item) {
                     $this->raw_report .= '<li>' . AibolitHelpers::makeSafeFn($vars->structure['n'][$l_Item['ndx']], $this->addPrefix, $this->noPrefix, true) . ' - ' . $l_Item['id'] . '</li>';
                 }
@@ -3770,9 +3770,9 @@ class HTMLReport extends Report
             }
         }
 
-        if (count($vars->criticalPHP) > 0) {
+        if (count((array)$vars->criticalPHP) > 0) {
             $criticalPHP              = array_slice($vars->criticalPHP, 0, self::MAX_ROWS);
-            $this->raw_report .= '<div class="note_vir">' . Translate::getStr('detected.shell_scripts') . ' (' . count($criticalPHP) . ')</div><div class="crit">';
+            $this->raw_report .= '<div class="note_vir">' . Translate::getStr('detected.shell_scripts') . ' (' . count((array)$criticalPHP) . ')</div><div class="crit">';
             $this->raw_report .= $this->printList($criticalPHP, $vars, $vars->criticalPHPFragment, $vars->criticalPHPSig, 'table_crit');
             $this->raw_report .= '</div>' . PHP_EOL;
             $l_ShowOffer = true;
@@ -3780,76 +3780,76 @@ class HTMLReport extends Report
             $this->raw_report .= '<div class="ok"><b>' . Translate::getStr('not_detected.shell_scripts') . '</b></div>';
         }
 
-        if (count($vars->criticalJS) > 0) {
+        if (count((array)$vars->criticalJS) > 0) {
             $criticalJS              = array_slice($vars->criticalJS, 0, self::MAX_ROWS);
-            $this->raw_report .= '<div class="note_vir">' . Translate::getStr('detected.javascript') . ' (' . count($criticalJS) . ')</div><div class="crit">';
+            $this->raw_report .= '<div class="note_vir">' . Translate::getStr('detected.javascript') . ' (' . count((array)$criticalJS) . ')</div><div class="crit">';
             $this->raw_report .= $this->printList($criticalJS, $vars, $vars->criticalJSFragment, $vars->criticalJSSig, 'table_vir');
             $this->raw_report .= "</div>" . PHP_EOL;
 
             $l_ShowOffer = true;
         }
 
-        if (count($vars->notRead) > 0) {
+        if (count((array)$vars->notRead) > 0) {
             $notRead               = array_slice($vars->notRead, 0, self::AIBOLIT_MAX_NUMBER);
-            $this->raw_report .= '<div class="note_vir">' . Translate::getStr('warning.reading_error') . ' (' . count($notRead) . ')</div><div class="crit">';
+            $this->raw_report .= '<div class="note_vir">' . Translate::getStr('warning.reading_error') . ' (' . count((array)$notRead) . ')</div><div class="crit">';
             $this->raw_report .= $this->printList($notRead, $vars);
             $this->raw_report .= "</div><div class=\"spacer\"></div>" . PHP_EOL;
         }
 
-        if (count($vars->phishing) > 0) {
-            $this->raw_report .= '<div class="note_vir">' . Translate::getStr('detected.phishing_pages') . ' (' . count($vars->phishing) . ')</div><div class="crit">';
+        if (count((array)$vars->phishing) > 0) {
+            $this->raw_report .= '<div class="note_vir">' . Translate::getStr('detected.phishing_pages') . ' (' . count((array)$vars->phishing) . ')</div><div class="crit">';
             $this->raw_report .= $this->printList($vars->phishing, $vars, $vars->phishingFragment, $vars->phishingSigFragment, 'table_vir');
             $this->raw_report .= "</div>" . PHP_EOL;
 
             $l_ShowOffer = true;
         }
 
-        if (count($vars->redirect) > 0) {
+        if (count((array)$vars->redirect) > 0) {
             $l_ShowOffer             = true;
-            $this->raw_report .= '<div class="note_vir">' . Translate::getStr('suspicion.htaccess') . ' (' . count($vars->redirect) . ')</div><div class="crit">';
+            $this->raw_report .= '<div class="note_vir">' . Translate::getStr('suspicion.htaccess') . ' (' . count((array)$vars->redirect) . ')</div><div class="crit">';
             $this->raw_report .= "</div>" . PHP_EOL;
         }
 
-        if (count($vars->symLinks) > 0) {
+        if (count((array)$vars->symLinks) > 0) {
             $symLinks               = array_slice($vars->symLinks, 0, self::AIBOLIT_MAX_NUMBER);
-            $this->raw_report .= '<div class="note_vir">' . Translate::getStr('symlinks') . ' (' . count($symLinks) . ')</div><div class="crit">';
+            $this->raw_report .= '<div class="note_vir">' . Translate::getStr('symlinks') . ' (' . count((array)$symLinks) . ')</div><div class="crit">';
             $this->raw_report .= nl2br(AibolitHelpers::makeSafeFn(implode("\n", $symLinks), $this->addPrefix, $this->noPrefix, true));
             $this->raw_report .= "</div><div class=\"spacer\"></div>";
         }
 
         if ($this->ai_extra_warn) {
-            $l_WarningsNum = count($vars->warningPHP);
+            $l_WarningsNum = count((array)$vars->warningPHP);
             if ($l_WarningsNum > 0) {
                 $this->raw_report .= "<div style=\"margin-top: 20px\" class=\"title\">" . Translate::getStr('warnings') . "</div>";
             }
             if ($l_WarningsNum > 0) {
                 $warningPHP              = array_slice($vars->warningPHP, 0, self::AIBOLIT_MAX_NUMBER);
-                $this->raw_report .= '<div class="note_warn">' . Translate::getStr('suspicion.code') . ' (' . count($warningPHP) . ')</div><div class="warn">';
+                $this->raw_report .= '<div class="note_warn">' . Translate::getStr('suspicion.code') . ' (' . count((array)$warningPHP) . ')</div><div class="warn">';
                 $this->raw_report .= $this->printList($warningPHP, $vars, $vars->warningPHPFragment, $vars->warningPHPSig, 'table_warn');
                 $this->raw_report .= '</div>' . PHP_EOL;
             }
         }
 
-        $l_WarningsNum = count($vars->bigFiles) + count($vars->adwareList) + count($vars->doorway) + count($vars->warningPHP) + count($vars->skippedFolders);
+        $l_WarningsNum = count((array)$vars->bigFiles) + count((array)$vars->adwareList) + count((array)$vars->doorway) + count((array)$vars->warningPHP) + count((array)$vars->skippedFolders);
 
         if ($l_WarningsNum > 0) {
             $this->raw_report .= "<div style=\"margin-top: 20px\" class=\"title\">" . Translate::getStr('warnings') . "</div>";
         }
 
-        if (count($vars->adwareList) > 0) {
+        if (count((array)$vars->adwareList) > 0) {
             $this->raw_report .= '<div class="note_warn">' . Translate::getStr('detected.bad_links') . '</div><div class="warn">';
             $this->raw_report .= $this->printList($vars->adwareList, $vars, $vars->adwareListFragment);
             $this->raw_report .= "</div>" . PHP_EOL;
         }
 
-        if (count($vars->bigFiles) > 0) {
+        if (count((array)$vars->bigFiles) > 0) {
             $bigFiles               = array_slice($vars->bigFiles, 0, self::AIBOLIT_MAX_NUMBER);
             $this->raw_report .= "<div class=\"note_warn\">" . Translate::getStr('skipped.large_file', [$this->max_size]) . '</div><div class="warn">';
             $this->raw_report .= nl2br(AibolitHelpers::makeSafeFn(implode("\n", $bigFiles), $this->addPrefix, $this->noPrefix, true));
             $this->raw_report .= "</div>";
         }
 
-        if (count($vars->doorway) > 0) {
+        if (count((array)$vars->doorway) > 0) {
             $doorway              = array_slice($vars->doorway, 0, self::AIBOLIT_MAX_NUMBER);
             $this->raw_report .= '<div class="note_warn">' . Translate::getStr('suspicion.doorway') . '</div><div class="warn">';
             $this->raw_report .= nl2br(AibolitHelpers::makeSafeFn(implode("\n", $doorway), $this->addPrefix, $this->noPrefix, true));
@@ -3857,7 +3857,7 @@ class HTMLReport extends Report
 
         }
 
-        if (count($vars->CMS) > 0) {
+        if (count((array)$vars->CMS) > 0) {
             $this->raw_report .= "<div class=\"note_warn\">" . Translate::getStr('founded_CMS') . "<br/>";
             $this->raw_report .= nl2br(AibolitHelpers::makeSafeFn(implode("\n", $vars->CMS), $this->addPrefix, $this->noPrefix));
             $this->raw_report .= "</div>";
@@ -3936,7 +3936,7 @@ class HTMLReport extends Report
 
         $l_Result .= "</tr></thead><tbody>";
 
-        for ($i = 0, $iMax = count($par_List); $i < $iMax; $i++) {
+        for ($i = 0, $iMax = count((array)$par_List); $i < $iMax; $i++) {
             if ($par_SigId != null) {
                 $l_SigId = 'id_' . $par_SigId[$i];
             } else {
@@ -4154,12 +4154,12 @@ class DetachedMode
             $scan->QCR_GoScan($s_file, null, $use_base64, false, $this->finder->getFilter());
             $this->vars->bigFiles = $this->finder->getBigFiles();
 
-            if (count($this->vars->bigFiles) > 0) {
+            if (count((array)$this->vars->bigFiles) > 0) {
                 $scan->prepareBigFilesToCriticalList($this->vars->bigFiles, $this->vars);
             }
             $bigElfs = $this->finder->getBigElfFiles();
 
-            if (count($bigElfs) > 0) {
+            if (count((array)$bigElfs) > 0) {
                 $scan->prepareBigElfFilesToCriticalSusList($bigElfs, $this->vars);
             }
             $scan->whitelisting();
@@ -4497,10 +4497,10 @@ class ResidentMode
     protected function writeReport($vars, $scan_time, $type, $file)
     {
         $file = basename($file);
-        $critPHP = count($vars->criticalPHP);
-        $critJS = count($vars->criticalJS);
-        $black = count($vars->blackFiles);
-        $warning = count($vars->warningPHP);
+        $critPHP = count((array)$vars->criticalPHP);
+        $critJS = count((array)$vars->criticalJS);
+        $black = count((array)$vars->blackFiles);
+        $warning = count((array)$vars->warningPHP);
         $malware = ($critPHP > 0)
             || ($critJS > 0)
             || ($black > 0)
@@ -4597,7 +4597,7 @@ class ResidentMode
 
         if ($type == 'notify') {
             $files_to_scan = $job->files;
-            $count = count($files_to_scan);
+            $count = count((array)$files_to_scan);
             $this->debugLog("Job {$file}: notify. {$count} files to be scanned");
 
             if ($count > $this->max_files_per_notify_scan) {
@@ -4616,7 +4616,7 @@ class ResidentMode
             }
         } elseif ($type == 'upload') {
             $files_to_scan = $job->files;
-            $count = count($files_to_scan);
+            $count = count((array)$files_to_scan);
             $this->debugLog("Job {$file}: upload. {$count} files to be scanned");
 
             if ($count > 1) {
@@ -4807,7 +4807,7 @@ class DebugMode
     public function printPerfomanceStats()
     {
         $keys = array_keys($this->perfomance_stats);
-        for ($i = 0, $iMax = count($keys); $i < $iMax; $i++) {
+        for ($i = 0, $iMax = count((array)$keys); $i < $iMax; $i++) {
             $this->perfomance_stats[$keys[$i]] = round($this->perfomance_stats[$keys[$i]] * 1000000);
         }
 
@@ -5695,7 +5695,7 @@ class FileFilter
     {
         $tree = $this->getTree($path, true);
         $_path = &$this->ignored_av_admin_paths;
-        for ($i = count($tree) - 1; $i >= 0; $i--) {
+        for ($i = count((array)$tree) - 1; $i >= 0; $i--) {
             if ($tree[$i] === '') {
                 continue;
             }
@@ -5719,7 +5719,7 @@ class FileFilter
         }
         $tree = $this->getTree($path, true);
         $_path = &$this->ignored_av_admin_paths;
-        for ($i = count($tree) - 1; $i >= 0; $i--) {
+        for ($i = count((array)$tree) - 1; $i >= 0; $i--) {
             if ($tree[$i] === '') {
                 continue;
             }
@@ -5848,7 +5848,7 @@ class FileFilter
         }
 
         $this->ignoreExt = explode(',', $ext_list);
-        for ($i = 0, $iMax = count($this->ignoreExt); $i < $iMax; $i++) {
+        for ($i = 0, $iMax = count((array)$this->ignoreExt); $i < $iMax; $i++) {
             $this->ignoreExt[$i] = trim($this->ignoreExt[$i]);
         }
         $this->ignoreExt = array_flip($this->ignoreExt);
@@ -5866,7 +5866,7 @@ class FileFilter
         }
 
         $this->sensitiveExt = explode(",", $ext_list);
-        for ($i = 0, $iMax = count($this->sensitiveExt); $i < $iMax; $i++) {
+        for ($i = 0, $iMax = count((array)$this->sensitiveExt); $i < $iMax; $i++) {
             if ($this->sensitiveExt[$i] == '.') {
                 $this->sensitiveExt[$i] = '';
             }
@@ -6078,7 +6078,7 @@ class FileFilter
         }
 
         $this->no_match_patterns = explode(',', $templates);
-        for ($i = 0, $iMax = count($this->no_match_patterns); $i < $iMax; $i++) {
+        for ($i = 0, $iMax = count((array)$this->no_match_patterns); $i < $iMax; $i++) {
             $this->no_match_patterns[$i] = trim($this->no_match_patterns[$i]);
         }
     }
@@ -6089,7 +6089,7 @@ class FileFilter
             return;
         }
         $this->match_patterns = explode(',', $templates);
-        for ($i = 0, $iMax = count($this->match_patterns); $i < $iMax; $i++) {
+        for ($i = 0, $iMax = count((array)$this->match_patterns); $i < $iMax; $i++) {
             $this->match_patterns[$i] = trim($this->match_patterns[$i]);
         }
     }
@@ -6468,7 +6468,7 @@ class Scanner
                 $filesForCloudAssistedScan[] = $filepath;
             }
 
-            if (count($filesForCloudAssistedScan) == 0) {
+            if (count((array)$filesForCloudAssistedScan) == 0) {
                 return;
             }
 
@@ -6489,7 +6489,7 @@ class Scanner
                 $scan_bufer_files = function ($files_list, &$i) use ($callback) {
                     $this->vars->hashtable = new HashTable();
                     $files_to_scan = $this->CloudAssitedFilter($files_list);
-                    $this->vars->files_and_ignored += count($files_list) - count($files_to_scan);
+                    $this->vars->files_and_ignored += count((array)$files_list) - count((array)$files_to_scan);
                     foreach ($files_to_scan as $filepath) {
                         $this->QCR_ScanFile($filepath, $this->vars, $callback, $i++);
                     }
@@ -6498,12 +6498,12 @@ class Scanner
                 $files_bufer = [];
                 foreach ($filesForCloudAssistedScan as $l_Filename) {
                     $files_bufer[] = $l_Filename;
-                    if (count($files_bufer) >= CLOUD_ASSIST_LIMIT) {
+                    if (count((array)$files_bufer) >= CLOUD_ASSIST_LIMIT) {
                         $scan_bufer_files($files_bufer, $i);
                         $files_bufer = [];
                     }
                 }
-                if (count($files_bufer)) {
+                if (count((array)$files_bufer)) {
                     $scan_bufer_files($files_bufer, $i);
                 }
                 unset($files_bufer);
@@ -6828,7 +6828,7 @@ class Scanner
 
     public function prepareBigFilesToCriticalList($list, &$vars)
     {
-        $base = count($vars->structure['n']);
+        $base = count((array)$vars->structure['n']);
         foreach ($list as $i => $fn) {
             $l_Ext = strtolower(pathinfo($fn, PATHINFO_EXTENSION));
             if ($this->critical_fs->satisfiedBy($l_Ext, 'extensions')) {
@@ -6843,7 +6843,7 @@ class Scanner
 
     public function prepareBigElfFilesToCriticalSusList($list, &$vars)
     {
-        $base = count($vars->structure['n']);
+        $base = count((array)$vars->structure['n']);
         foreach ($list as $i => $fn) {
             $file = new FileInfo($fn, $base + $i);
             $heur_sig = 'SMW-HEUR-ELF';
@@ -7226,7 +7226,7 @@ class Scanner
                 $p_Sig = $p . 'SigFragment';
             }
 
-            $count = count($this->vars->{$p});
+            $count = count((array)$this->vars->{$p});
             for ($i = 0; $i < $count; $i++) {
                 $id = $this->vars->{$p}[$i];
                 if ($this->vars->structure['crc'][$id] !== 0 && in_array($this->vars->structure['crc'][$id], $list)) {
@@ -8603,7 +8603,7 @@ class OsReleaseInfo
         $l = preg_split("~\s+~", trim($firstline), -1, PREG_SPLIT_NO_EMPTY);
         if (!empty($l)) {
             $version = $l[0];
-            if (count($l) > 1) {
+            if (count((array)$l) > 1) {
                 $id = $l[1];
             }
         }
@@ -8626,7 +8626,7 @@ class OsReleaseInfo
 
     private function getRelease($release_file = '')
     {
-        if (count($this->release) != 0) {
+        if (count((array)$this->release) != 0) {
             return $this->release;
         }
         if ($this->release_file) {
@@ -10052,7 +10052,7 @@ class RapidAccountScan
      */
     private function doCloudScan()
     {
-        if (count($this->scanlist) <= 0) {
+        if (count((array)$this->scanlist) <= 0) {
             return;
         }
 
@@ -10313,7 +10313,7 @@ class RapidAccountScan
             $this->db->put($file);
         }
 
-        if (count($this->scanlist) >= self::MAX_TO_SCAN) {
+        if (count((array)$this->scanlist) >= self::MAX_TO_SCAN) {
             // our scan list is big enough
             // let's flush db, and scan the list
             $this->db->flushBatch();
@@ -10337,7 +10337,7 @@ class RapidAccountScan
         foreach ($files as $filepath) {
             $counter = $this->counter + $i;
             $vars->totalFiles++;
-            $this->processedFiles = $counter - $vars->totalFolder - count($this->scanlist);
+            $this->processedFiles = $counter - $vars->totalFolder - count((array)$this->scanlist);
             printProgress($this->processedFiles, $filepath, $vars);
             $this->scanFile($filepath, $rescan, $counter, $vars);
             $i++;
@@ -10356,7 +10356,7 @@ class RapidAccountScan
         $this->db->flushBatch();
 
         //process whatever is left in our scan list
-        if (count($this->scanlist) > 0) {
+        if (count((array)$this->scanlist) > 0) {
             $this->processScanList($vars);
         }
 
@@ -10381,7 +10381,7 @@ class RapidAccountScan
                 $p_Sig = $p . 'SigFragment';
             }
 
-            $count = count($vars->{$p});
+            $count = count((array)$vars->{$p});
             for ($i = 0; $i < $count; $i++) {
                 $id = $vars->{$p}[$i];
                 if ($vars->structure['crc'][$id] !== 0 && in_array($vars->structure['crc'][$id], $list)) {
@@ -11180,8 +11180,8 @@ class Helpers
         }
         $at = array_values($at);
         $str = "";
-        for ($i = 0, $iMax = count($ae); $i < $iMax; $i++) {
-            if ($i < count($ae) - 1) {
+        for ($i = 0, $iMax = count((array)$ae); $i < $iMax; $i++) {
+            if ($i < count((array)$ae) - 1) {
                 $str .= str_replace(md5($at[$i]), "", $ae[$i]);
             } else {
                 $str .= $ae[$i];
@@ -11320,7 +11320,7 @@ class Helpers
             $i = 0;
         }
 
-        for ($i, $iMax = count($cipher); $i < $iMax; $i += 2) {
+        for ($i, $iMax = count((array)$cipher); $i < $iMax; $i += 2) {
             $return = self::block_decrypt($cipher[$i], $cipher[$i+1], $_key);
             if($cbc == 1) {
                 $plain[] = [$return[0] ^ $cipher[$i - 2], $return[1] ^ $cipher[$i - 1]];
@@ -11330,7 +11330,7 @@ class Helpers
         }
 
         $output = "";
-        for($i = 0, $iMax = count($plain); $i < $iMax; $i++) {
+        for($i = 0, $iMax = count((array)$plain); $i < $iMax; $i++) {
             $output .= self::_long2str($plain[$i][0]);
             $output .= self::_long2str($plain[$i][1]);
         }
@@ -11343,7 +11343,7 @@ class Helpers
         $res = $task;
 
         while (preg_match('~\(?(\d+)\s?([+\-*\/])\s?(\d+)\)?~', $res, $subMatch)) {
-            if (count($subMatch) === 4) {
+            if (count((array)$subMatch) === 4) {
                 $subSearch = $subMatch[0];
                 $operator = $subMatch[2];
                 $number_1 = $subMatch[1];
@@ -11510,10 +11510,10 @@ class Helpers
         $vars = [];
 
         preg_match_all('~(\$(?:[^\w]+|\w+)\s*=(\s?\.?\s?\$(?:[^\w]+|\w+)[{\[]\d+[\]}])+)~msi', $content, $concatMatches);
-        for ($i = 0; $iMax = count($concatMatches[0]), $i <= $iMax; $i++) {
+        for ($i = 0; $iMax = count((array)$concatMatches[0]), $i <= $iMax; $i++) {
             preg_match_all('~(\$(?:[^\w]+|\w+)(=))?(\s?(\.?)\s?\$(?:[^\w]+|\w+)[{\[](\d+)[\]}])~msi',
                 $concatMatches[0][$i], $varMatches);
-            for ($j = 0; $jMax = count($varMatches[0]), $j < $jMax; $j++) {
+            for ($j = 0; $jMax = count((array)$varMatches[0]), $j < $jMax; $j++) {
                 $varName = substr($varMatches[1][0], 0, -1);
                 $value = $dictionary[(int)$varMatches[5][$j]] ?? '';
 
@@ -13063,7 +13063,7 @@ class Deobfuscator
 
     public function getFragments()
     {
-        if (count($this->fragments) > 0) {
+        if (count((array)$this->fragments) > 0) {
             return $this->fragments;
         }
         return false;
@@ -13096,7 +13096,7 @@ class Deobfuscator
     private function deobfuscateFragments()
     {
         $prev_step = '';
-        if (count($this->fragments) > 0) {
+        if (count((array)$this->fragments) > 0) {
             $i = 0;
             foreach ($this->fragments as $frag => $value) {
                 if ($frag !== $value) {
@@ -13130,7 +13130,7 @@ class Deobfuscator
         $this->grabFragments();
         $this->deobfuscateFragments();
         $deobfuscated = $this->cur;
-        if (count($this->fragments) > 0 ) {
+        if (count((array)$this->fragments) > 0 ) {
             foreach ($this->fragments as $fragment => $text) {
                 $deobfuscated = str_replace($fragment, $text, $deobfuscated);
             }
@@ -13972,7 +13972,7 @@ class Deobfuscator
         if (Helpers::concatStr($matches[1]) === 'create_function'
             && Helpers::concatStr($matches[2]) === 'eval') {
             $funcs = explode('(', $funcs);
-            $iMax = count($funcs) - 2;
+            $iMax = count((array)$funcs) - 2;
             $final_code = $matches[5];
 
             for ($i = $iMax; $i >= 0; $i--) {
@@ -14867,7 +14867,7 @@ class Deobfuscator
 
         $count = 0;
         preg_match_all('~,(\d+|0x\w+)\)~msi', $phpcode, $offsetMatches, PREG_SET_ORDER);
-        if (count($offsetMatches) === 2) {
+        if (count((array)$offsetMatches) === 2) {
             foreach ($offsetMatches as $offsetMatch) {
                 if (strpos($offsetMatch[1], '0x') !== false && isset($str[$offset + hexdec($offsetMatch[1])])) {
                     $count++;
@@ -14934,7 +14934,7 @@ class Deobfuscator
         $obfPHP        = $str;
         $phpcode       = base64_decode(Helpers::getTextInsideQuotes(Helpers::getEvalCode($obfPHP)));
         $needles       = Helpers::getNeedles($phpcode);
-        $needle        = $needles[count($needles) - 2];
+        $needle        = $needles[count((array)$needles) - 2];
         $before_needle = end($needles);
         $pointer1 = $matches[2];
         $temp = strtr($obfPHP, $needle, $before_needle);
@@ -15012,7 +15012,7 @@ class Deobfuscator
 
         preg_match_all('~\\' . $var . '\[\]\s*=\s*\'([\w\*\-\#]+)\'~msi', $res, $matches);
 
-        for ($i = 0, $iMax = count($matches[1]); $i <= $iMax; $i++) {
+        for ($i = 0, $iMax = count((array)$matches[1]); $i <= $iMax; $i++) {
             if (@function_exists($matches[1][$i])) {
                 $res = str_replace($var . '[' . $i . ']', $matches[1][$i], $res);
             } else {
@@ -15048,7 +15048,7 @@ class Deobfuscator
         $res = str_replace("''", '', $res);
 
         preg_match_all('~\$(\w+)\s*=\s*\'([\w\*\-\#]+)\'~msi', $res, $matches, PREG_SET_ORDER);
-        for ($i = 0, $iMax = count($matches); $i < $iMax; $i++) {
+        for ($i = 0, $iMax = count((array)$matches); $i < $iMax; $i++) {
             if (@function_exists($matches[$i][2])) {
                 $res = str_replace('$' . $matches[$i][1], $matches[$i][2], $res);
                 $res = str_replace('${"GLOBALS"}["' . $matches[$i][1] . '"]', $matches[$i][2], $res);
@@ -15245,9 +15245,9 @@ class Deobfuscator
         $val = '';
         if (!@preg_match_all('~\\' . $evalVar . '\s*=\s*("[^"]+");~msi', $str, $matches)) {
             @preg_match_all('~\\' . $evalVar . '\s*=\s*(\'[^\']+\');~msi', $str, $matches);
-            $val = @$matches[1][count($matches[1])  - 1];
+            $val = @$matches[1][count((array)$matches[1])  - 1];
         } else {
-            $val = $matches[1][count($matches[1])  - 1];
+            $val = $matches[1][count((array)$matches[1])  - 1];
         }
         $res = str_replace($matches[0], '', $str);
         $val = substr($val, 1, -1);
@@ -15340,9 +15340,9 @@ class Deobfuscator
                    && (strlen(strstr($phpcode, '__FILE__')) === 0) && $hangs < 30) {
                 $old = $phpcode;
                 $funcs = explode(';', $phpcode);
-                if (count($funcs) == 5) {
+                if (count((array)$funcs) == 5) {
                     $phpcode = gzinflate(base64_decode(str_rot13(Helpers::getTextInsideQuotes(Helpers::getEvalCode($phpcode)))));
-                } elseif (count($funcs) == 4) {
+                } elseif (count((array)$funcs) == 4) {
                     $phpcode = gzinflate(base64_decode(Helpers::getTextInsideQuotes(Helpers::getEvalCode($phpcode))));
                 }
                 $hangs++;
@@ -15443,7 +15443,7 @@ class Deobfuscator
 
         $res = '';
         preg_match_all('~(\$\w+=\$\w+[\'.]+\$\w+;)~', $str, $match);
-        for ($i = 0, $iMax = count($match[0]); $i < $iMax; $i++) {
+        for ($i = 0, $iMax = count((array)$match[0]); $i < $iMax; $i++) {
 
             $split = explode('=', str_replace(';', '', $match[0][$i]));
             $concats = explode('.', $split[1]);
@@ -16267,7 +16267,7 @@ class Deobfuscator
             $res, $match)) {
             $arr = explode(PHP_EOL, $str);
             foreach ($arr as $index => $val) {
-                if ($index !== count($arr) - 1) {
+                if ($index !== count((array)$arr) - 1) {
                     $arr[$index] .= PHP_EOL;
                 }
             }
@@ -16834,7 +16834,7 @@ class Deobfuscator
         /* hate function */
         $finalPHPCode = null;
         $problems = explode(".", gzinflate(base64_decode($matches[2])));
-        for ($mistake = 0; $mistake < count($problems); $mistake += strlen($matches[6])) {
+        for ($mistake = 0; $mistake < count((array)$problems); $mistake += strlen($matches[6])) {
             for ($hug = 0; $hug < strlen($matches[6]); $hug++) {
                 $past = (int)$problems[$mistake + $hug];
                 $present = (int)ord(substr($matches[6], $hug, 1));
