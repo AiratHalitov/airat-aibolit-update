@@ -5398,6 +5398,7 @@ class Finder
     }
 }
 
+#[AllowDynamicProperties]
 class FileFilter
 {
     const IMUNIFY_CLEANUP_STORAGE = '/var/imunify360/cleanup_storage';
@@ -6334,7 +6335,7 @@ class FileFilter
     
 }
 
-
+#[AllowDynamicProperties]
 class Scanner
 {
     private $addPrefix;
