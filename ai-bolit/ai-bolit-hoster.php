@@ -2730,7 +2730,7 @@ class JSONReport extends Report
             'db_version'    => $db_meta_info_version,
         ];
 
-        $this->file = $file;
+        $this->file = fix_filename($file);
 
         if($this->file) {
             @unlink($this->file);
@@ -3080,7 +3080,7 @@ class PlainReport extends Report
         $this->ai_hoster = $ai_hoster;
         $this->addPrefix = $add_prefix;
         $this->noPrefix = $no_prefix;
-        $this->file = $file;
+        $this->file = fix_filename($file);
 
         if($this->file) {
             @unlink($this->file);
@@ -3250,7 +3250,7 @@ class CSVReport extends Report
         $this->ai_hoster = $ai_hoster;
         $this->addPrefix = $add_prefix;
         $this->noPrefix = $no_prefix;
-        $this->file = $file;
+        $this->file = fix_filename($file);
         $this->stat = $stat;
 
         if($this->file) {
@@ -3528,7 +3528,7 @@ class DoublecheckReport extends Report
     {
         $this->raw_report = [];
 
-        $this->file = $file;
+        $this->file = fix_filename($file);
 
         if(file_exists($this->file)) {
             $this->skip = true;
@@ -3647,7 +3647,7 @@ class HTMLReport extends Report
         $this->doublecheck = $doublecheck;
 
         $this->raw_report = '';
-        $this->file = $file;
+        $this->file = fix_filename($file);
 
         if($this->file) {
             @unlink($this->file);
@@ -5105,6 +5105,20 @@ class HashTable
     }
 }
 
+
+/**
+ * Fixes filename for Windows (if it contains double dot :).
+ * @param string $filename
+ * @return string
+ */
+function fix_filename($filename)
+{
+    if (stristr(PHP_OS, 'WIN') && substr_count($filename, ":") > 1) {
+        $pos = strpos($filename, ":");
+        return substr($filename, 0, $pos + 1) . str_replace(':', '', substr($filename, $pos + 1));
+    } else
+        return $filename;
+}
 
 class Finder
 {
